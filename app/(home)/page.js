@@ -26,7 +26,7 @@ export default function Home() {
     <div className="h-screen w-screen flex items-center justify-center bg-black">
       <div className="w-[400px] border-[1px] border-white/30 rounded-3xl flex flex-col items-center p-5 pb-7">
         <ChatBubbleBottomCenterTextIcon className="h-20 w-20 text-white mb-2" />
-        <h1 className="font-bold text-5xl">Quick3</h1>
+        <h1 className="font-bold text-5xl">3Chat</h1>
         <h3>Messenger</h3>
 
         {!isConnected && (
@@ -41,17 +41,6 @@ export default function Home() {
               }}
             >
               Metamask
-            </Button>
-            <Button
-              className="w-full mt-5 rounded-2xl"
-              size="lg"
-              onClick={() => {
-                connect({
-                  connector: connectors[1],
-                });
-              }}
-            >
-              Coinbase
             </Button>
           </>
         )}
@@ -74,8 +63,8 @@ export default function Home() {
                 }
               }}
             >
-              Initiate Push{" "}
-              <ChatBubbleBottomCenterTextIcon className="h-5 w-5 ml-1" />
+              Start
+              
             </Button>
             <Button
               className="w-full mt-5 rounded-2xl flex items-center justify-center"
@@ -86,7 +75,6 @@ export default function Home() {
               }}
             >
               Disconnect{" "}
-              <ArrowLeftStartOnRectangleIcon className="h-5 w-5 ml-1 -mt-0.5" />
             </Button>
           </>
         )}
