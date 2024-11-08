@@ -25,7 +25,6 @@ export default function Home() {
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-black">
       <div className="w-[400px] border-[1px] border-white/30 rounded-3xl flex flex-col items-center p-5 pb-7">
-        <ChatBubbleBottomCenterTextIcon className="h-20 w-20 text-white mb-2" />
         <h1 className="font-bold text-5xl">3Chat</h1>
         <h3>Messenger</h3>
 
