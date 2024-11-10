@@ -3,7 +3,7 @@
 import Navbar from "@/components/layout/dashboard/Navbar";
 import { Button } from "@material-tailwind/react";
 import {
-  ArrowRightEndOnRectangleIcon,
+  ArrowLeftIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/24/solid";
 import Avatar from "boring-avatars";
@@ -54,6 +54,16 @@ export default function Chat({ params }) {
 
       <div className="w-full flex items-center justify-between gap-4 rounded-2xl bg-gray-900 p-3 px-5 mt-5">
         <div className="flex gap-4 items-center">
+        <Button
+            size="lg"
+            className="rounded-2xl flex items-center justify-center gap-2 bg-gray-800"
+            onClick={() => {
+              router.push("/dashboard");
+            }}
+          >
+            <ArrowLeftIcon className="h-4 w-4 -mt-0.5" />
+            Back
+          </Button>
           <Avatar
             size={40}
             name={params.id.split("%3A")[1]}
@@ -66,16 +76,6 @@ export default function Chat({ params }) {
           </div>
         </div>
         <div className="flex gap-4 items-center">
-          <Button
-            size="lg"
-            className="rounded-2xl flex items-center justify-center gap-2 bg-gray-800"
-            onClick={() => {
-              router.push("/dashboard");
-            }}
-          >
-            <ArrowRightEndOnRectangleIcon className="h-4 w-4 -mt-0.5" />
-            Back
-          </Button>
         </div>
       </div>
 
@@ -87,6 +87,11 @@ export default function Chat({ params }) {
             placeholder="Type your message here"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
           ></input>
           <Button
             size="lg"

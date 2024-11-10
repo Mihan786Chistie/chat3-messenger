@@ -1,4 +1,3 @@
-import * as React from "react";
 import { usePublicClient } from "wagmi";
 import { providers } from "ethers";
 

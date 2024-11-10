@@ -41,7 +41,7 @@ export function LoginDialog() {
           }
         >
           <ChatBubbleBottomCenterTextIcon className="h-20 w-20 text-white mb-2" />
-          <h1 className="font-bold text-5xl">Quick3</h1>
+          <h1 className="font-bold text-5xl">3Chat</h1>
           <h3>Messenger</h3>
           <p className="mt-5">Please connect your wallet to continue.</p>
 

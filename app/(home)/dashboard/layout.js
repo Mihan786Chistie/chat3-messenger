@@ -2,8 +2,8 @@ import AddDialog from "@/components/layout/dialog/addDialog";
 import { LoginDialog } from "@/components/layout/dialog/loginDialog";
 
 export const metadata = {
-  title: "Quick3 | Dashboard",
-  description: "Quick3 Messenger",
+  title: "3Chat | Dashboard",
+  description: "3Chat Messenger",
 };
 
 export default function RootLayout({ children }) {

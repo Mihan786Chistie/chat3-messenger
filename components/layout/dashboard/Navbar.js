@@ -48,7 +48,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex flex-col items-center -ml-16">
-          <h1 className="font-bold text-5xl">Quick3</h1>
+          <h1 className="font-bold text-5xl">3Chat</h1>
         </div>
 
         <Button
