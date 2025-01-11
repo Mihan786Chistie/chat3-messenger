@@ -6,7 +6,7 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind-blue)
 ![Push Protocol](https://img.shields.io/badge/PushProtocol-pink)
 
-> Web3 Chat App in 1 Day. Powered by Push Protocol
+> Web3 Chat App powered by Push Protocol
 
 The repository was scaffolded with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
