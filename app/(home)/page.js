@@ -6,7 +6,7 @@ import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { PushAPI, CONSTANTS } from "@pushprotocol/restapi"
 import { useEthersSigner } from "@/wagmi/EthersSigner"
 import { useDispatch, useSelector } from "react-redux"
-import { setUser } from "@/redux/slice/pushSlice"
+import { setUser, setProfile } from "@/redux/slice/pushSlice"
 import { useRouter } from "next/navigation"
 import usePush from "@/hooks/usePush"
 
@@ -36,9 +36,17 @@ export default function Home() {
       env: CONSTANTS.ENV.PROD,
     })
     if (user && !user.readMode) {
-      dispatch(setUser(user))
-      streamChat(user)
-      router.push("/dashboard")
+      dispatch(setUser(user));
+
+      const profile = await user.profile.info()
+      if(profile) {
+        dispatch(setProfile({
+          name: profile.name || "",
+          image: profile.picture || ""
+        }));
+      }
+      streamChat(user);
+      router.push("/dashboard");
     }
   }
 

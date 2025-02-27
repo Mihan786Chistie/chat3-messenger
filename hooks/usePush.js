@@ -5,6 +5,7 @@ import {
   setData,
   setRequests,
   setStream,
+  setProfile
 } from "@/redux/slice/pushSlice";
 import { CONSTANTS } from "@pushprotocol/restapi";
 import { useDispatch, useSelector } from "react-redux";
@@ -63,11 +64,24 @@ export default function usePush() {
     dispatch(setStream(stream));
   };
 
+  const fetchUserProfile = async (address) => {
+    try {
+      if(!user) return;
+      const profile = await user.profile.get(address);
+      dispatch(setProfile(profile));
+      return profile;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+  };
+
   return {
     fetchChats,
     fetchRequests,
     acceptRequest,
     rejectRequest,
     streamChat,
+    fetchUserProfile
   };
 }

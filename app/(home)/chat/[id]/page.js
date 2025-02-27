@@ -111,6 +111,8 @@ export default function Chat({ params }) {
                 key={index}
                 message={message.messageContent}
                 isMe={message.fromDID.split(":")[1] === user.account}
+                senderName={(message.fromDID.split(":")[1] === user.account) ? "You" : message.fromDID.split(":")[1]}
+                timestamp={message.timestamp}
               />
             ))}
           </div>
