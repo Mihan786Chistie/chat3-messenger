@@ -10,6 +10,11 @@ const pushSlice = createSlice({
     stream: null,
     data: null,
     addDialog: false,
+    profileDialog: false,
+    profile: {
+      name: '',
+      image: ''
+    }
   },
 
   reducers: {
@@ -31,6 +36,13 @@ const pushSlice = createSlice({
     handleAddDialog: (state, action) => {
       state.addDialog = !state.addDialog;
     },
+    handleProfileDialog: (state) => {
+      state.profileDialog = !state.profileDialog;
+    },
+    
+    setProfile: (state, action) => {
+      state.profile = action.payload;
+    }
   },
 });
 
@@ -41,6 +53,8 @@ export const {
   setStream,
   setData,
   handleAddDialog,
+  handleProfileDialog,
+  setProfile
 } = pushSlice.actions;
 
 export default pushSlice.reducer;
