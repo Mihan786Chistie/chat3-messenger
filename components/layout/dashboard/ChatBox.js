@@ -51,7 +51,7 @@ export default function ChatBox({ chat }) {
         <h2 className="text-lg text-white">
           {partnerProfile?.name || chat.did.split(":")[1]}
         </h2>
-        <h3 className="text-sm text-white/40">{chat.msg.messageContent}</h3>
+        <h3 className="text-sm text-white/40">{chat.msg.messageType === 'Image' ? 'Image' : chat.msg.messageContent}</h3>
       </div>
     </div>
   );
