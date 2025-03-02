@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Avatar from "boring-avatars";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
@@ -21,6 +21,7 @@ export default function Chat({ params }) {
   const [history, setHistory] = useState([]);
   const { isConnected } = useAccount();
   const data = useSelector((state) => state.push.data);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (user && isConnected) {
@@ -39,13 +40,50 @@ export default function Chat({ params }) {
     setHistory(history);
   };
 
-  const sendMessage = async () => {
-    await user.chat.send(params.id.replace("%3A", ":"), {
-      type: "Text",
-      content: message,
-    });
-    setMessage("");
-    fetchHistory();
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64String = event.target?.result;
+          if (typeof base64String === 'string') {
+            await sendMessage(base64String);
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        alert('Failed to process image. Please try again.');
+      }
+    }
+  };
+
+  const sendMessage = async (content) => {
+    try {
+      if (!content && message.trim()) {
+        // Handle text message
+        await user.chat.send(params.id.replace("%3A", ":"), {
+          type: 'Text',
+          content: message,
+        });
+        setMessage("");
+      } else if (content) {
+        // Handle image message - ensure content is base64
+        if (!content.startsWith('data:image')) {
+          throw new Error('Invalid image format');
+        }
+        
+        await user.chat.send(params.id.replace("%3A", ":"), {
+          type: 'Image',
+          content: content, // Send the base64 string directly
+        });
+      }
+      fetchHistory();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   return (
@@ -81,6 +119,20 @@ export default function Chat({ params }) {
 
       <div className="w-full h-full flex flex-col-reverse items-center gap-3 mt-5">
         <div className="w-full flex items-center justify-between gap-4 rounded-2xl bg-gray-900 p-3 px-5 mb-5">
+        <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+          />
+          <Button
+            size="sm"
+            className="rounded-2xl bg-gray-800"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Image
+          </Button>
           <input
             type="text"
             className="w-full h-full bg-gray-900 text-white/80 outline-none"
@@ -107,9 +159,10 @@ export default function Chat({ params }) {
         <div className="w-full flex-grow flex relative">
           <div className="w-full h-full flex flex-col-reverse gap-2 overflow-auto absolute">
             {history.map((message, index) => (
+              console.log(message),
               <ChatBubble
                 key={index}
-                message={message.messageContent}
+                message={message}
                 isMe={message.fromDID.split(":")[1] === user.account}
                 senderName={(message.fromDID.split(":")[1] === user.account) ? "You" : message.fromDID.split(":")[1]}
                 timestamp={message.timestamp}
