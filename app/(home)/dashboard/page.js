@@ -20,14 +20,14 @@ const poppins = Poppins({
 
 export default function Dashboard() {
   return (
-    <div className="w-[1024px] flex flex-col items-center">
+    <div className="w-[1024px] h-screen flex flex-col items-center">
       <Navbar />
 
-      <Tabs value="Chats" className="mt-5 w-full">
+      <Tabs value="Chats" className="mt-5 w-full flex-1 flex flex-col">
         <TabsHeader
           className="h-[60px] rounded-2xl bg-gray-800"
           indicatorProps={{
-            className: " shadow-none rounded-2xl bg-black",
+            className: "shadow-none rounded-2xl bg-black",
           }}
         >
           <Tab value="Chats" className={"text-white " + poppins.className}>
@@ -38,11 +38,11 @@ export default function Dashboard() {
           </Tab>
         </TabsHeader>
 
-        <TabsBody>
-          <TabPanel value="Chats" className="px-0">
+        <TabsBody className="flex-1">
+          <TabPanel value="Chats" className="px-0 h-full">
             <Chats />
           </TabPanel>
-          <TabPanel value="Requests" className="px-0">
+          <TabPanel value="Requests" className="px-0 h-full">
             <Requests />
           </TabPanel>
         </TabsBody>

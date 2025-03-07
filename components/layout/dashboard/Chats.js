@@ -64,9 +64,13 @@ export default function Chats() {
             <UserGroupIcon className="h-5 w-5 ml-2" />
           </Button>
         </div>
-        {chats.map((chat) => (
-          <ChatBox key={chat.chatId} chat={chat} />
-        ))}
+        <div className="flex-1 w-full overflow-y-auto scrollbar-hide">
+          <div className="space-y-3">
+            {chats.map((chat) => (
+              <ChatBox key={chat.chatId} chat={chat} />
+            ))}
+          </div>
+        </div>
       </div>
     )
   );
