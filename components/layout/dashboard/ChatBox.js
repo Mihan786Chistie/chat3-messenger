@@ -62,7 +62,7 @@ export default function ChatBox({ chat }) {
     }
     return getAvatarName();
   };
-
+  
   const getChatId = () => {
     if (chat.chatId) return chat.chatId;
     if (chat.did) return chat.did;
