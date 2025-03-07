@@ -2,10 +2,10 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { handleAddDialog, setChats } from "@/redux/slice/pushSlice";
+import { handleAddDialog, setChats, handleCreateGroupDialog } from "@/redux/slice/pushSlice";
 import ChatBox from "./ChatBox";
 import { Button } from "@material-tailwind/react";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 import { Poppins } from "next/font/google";
 import usePush from "@/hooks/usePush";
 
@@ -36,22 +36,37 @@ export default function Chats() {
   return (
     chats && (
       <div className="w-full h-full flex flex-col items-center gap-3">
+        <div className="w-full flex gap-2">
+          <Button
+            size="lg"
+            className={
+              "flex items-center justify-center flex-1 rounded-2xl normal-case " +
+              poppins.className
+            }
+            onClick={() => {
+              dispatch(handleAddDialog());
+            }}
+          >
+            Add Contact
+            <PlusIcon className="h-5 w-5 ml-2" />
+          </Button>
+          <Button
+            size="lg"
+            className={
+              "flex items-center justify-center flex-1 rounded-2xl normal-case " +
+              poppins.className
+            }
+            onClick={() => {
+              dispatch(handleCreateGroupDialog());
+            }}
+          >
+            Create Group
+            <UserGroupIcon className="h-5 w-5 ml-2" />
+          </Button>
+        </div>
         {chats.map((chat) => (
           <ChatBox key={chat.chatId} chat={chat} />
         ))}
-        <Button
-          size="lg"
-          className={
-            "flex items-center justify-center w-full rounded-2xl normal-case " +
-            poppins.className
-          }
-          onClick={() => {
-            dispatch(handleAddDialog());
-          }}
-        >
-          Add Contact
-          <PlusIcon className="h-5 w-5" />
-        </Button>
       </div>
     )
   );

@@ -45,7 +45,7 @@ export default function ChatBox({ chat }) {
     if (chat.did) {
       return chat.did.split(':')[1];
     }
-    if (chat.msg) {
+    if (chat.msg?.fromDID) {
       const fromAddress = chat.msg.fromDID.split(':')[1];
       const toAddress = chat.msg.toDID.split(':')[1];
       return fromAddress === user.account ? toAddress : fromAddress;
@@ -62,12 +62,28 @@ export default function ChatBox({ chat }) {
     }
     return getAvatarName();
   };
+  
+  const getChatId = () => {
+    if (chat.chatId) return chat.chatId;
+    if (chat.did) return chat.did;
+    if (chat.msg?.fromDID) {
+      const fromAddress = chat.msg.fromDID.split(':')[1];
+      const toAddress = chat.msg.toDID.split(':')[1];
+      return fromAddress === user.account ? 
+        `eip155:${toAddress}` : 
+        `eip155:${fromAddress}`;
+    }
+    return null;
+  };
+
+  const chatId = getChatId();
+  if (!chatId) return null;
 
   return (
     <div
       className="w-full flex items-center gap-4 rounded-2xl bg-gray-900 hover:bg-gray-800 transition-colors duration-300 hover:cursor-pointer p-3 px-5"
       onClick={() => {
-        router.push(`/chat/${chat.chatId || chat.did}`);
+        router.push(`/chat/${chatId}`);
       }}
     >
       {chat.groupInformation?.groupImage ? (

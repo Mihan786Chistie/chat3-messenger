@@ -5,6 +5,7 @@ import { Button } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
   PaperAirplaneIcon,
+  PaperClipIcon,
 } from "@heroicons/react/24/solid";
 import Avatar from "boring-avatars";
 import { useRouter } from "next/navigation";
@@ -131,7 +132,7 @@ export default function Chat({ params }) {
             className="rounded-2xl bg-gray-800"
             onClick={() => fileInputRef.current?.click()}
           >
-            Image
+            <PaperClipIcon className="h-6 w-6 -mt-0.5" />
           </Button>
           <input
             type="text"
