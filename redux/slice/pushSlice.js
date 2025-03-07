@@ -14,7 +14,8 @@ const pushSlice = createSlice({
     profile: {
       name: '',
       image: ''
-    }
+    },
+    createGroupDialog: false,
   },
 
   reducers: {
@@ -39,6 +40,9 @@ const pushSlice = createSlice({
     handleProfileDialog: (state) => {
       state.profileDialog = !state.profileDialog;
     },
+    handleCreateGroupDialog: (state) => {
+      state.createGroupDialog = !state.createGroupDialog;
+    },
     
     setProfile: (state, action) => {
       state.profile = action.payload;
@@ -54,6 +58,7 @@ export const {
   setData,
   handleAddDialog,
   handleProfileDialog,
+  handleCreateGroupDialog,
   setProfile
 } = pushSlice.actions;
 

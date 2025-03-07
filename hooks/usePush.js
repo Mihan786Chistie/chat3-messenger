@@ -76,12 +76,23 @@ export default function usePush() {
     }
   };
 
+  const createGroup = async (groupName, options) => {
+    try {
+      await user.chat.group.create(groupName, options);
+      await fetchChats(); // Refresh chat list after group creation
+    } catch (error) {
+      console.error('Error creating group:', error);
+      throw error;
+    }
+  };
+
   return {
     fetchChats,
     fetchRequests,
     acceptRequest,
     rejectRequest,
     streamChat,
-    fetchUserProfile
+    fetchUserProfile,
+    createGroup,
   };
 }

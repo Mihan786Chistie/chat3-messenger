@@ -11,6 +11,7 @@ import {
   TabPanel,
 } from "@material-tailwind/react";
 import { Poppins } from "next/font/google";
+import CreateGroupDialog from "@/components/layout/dialog/groupCreateDialog";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function Dashboard() {
           </TabPanel>
         </TabsBody>
       </Tabs>
+      <CreateGroupDialog />
     </div>
   );
 }
