@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import ChatBubble from "@/components/layout/chat/ChatBubble";
+import usePush from "@/hooks/usePush";
+import Image from "next/image";
 
 export default function Chat({ params }) {
   const router = useRouter();
@@ -23,6 +25,9 @@ export default function Chat({ params }) {
   const { isConnected } = useAccount();
   const data = useSelector((state) => state.push.data);
   const fileInputRef = useRef(null);
+  const [partnerProfile, setPartnerProfile] = useState(null);
+  const { fetchUserProfile } = usePush();
+  const myProfile = useSelector((state) => state.push.profile);
 
   useEffect(() => {
     if (user && isConnected) {
@@ -87,6 +92,83 @@ export default function Chat({ params }) {
     }
   };
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const partnerId = params.id.replace("%3A", ":");
+        
+        // Check if this is a group chat
+        if (partnerId.includes('group')) {
+          const groupData = await user.chat.group.info(partnerId);
+          setPartnerProfile({
+            name: groupData.groupName,
+            picture: groupData.groupImage,
+            isGroup: true
+          });
+          return;
+        }
+
+        // Regular user chat
+        const partnerAddress = partnerId.split(":")[1];
+        if (!partnerAddress) return;
+
+        const profile = await fetchUserProfile(partnerAddress);
+        setPartnerProfile({
+          ...profile,
+          isGroup: false
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    if (user && isConnected) {
+      fetchProfile();
+    }
+  }, [params.id, user, isConnected]);
+
+  const renderAvatar = () => {
+    if (!partnerProfile) return null;
+
+    const profilePicture = partnerProfile.picture;
+    const displayName = partnerProfile.name || params.id.split("%3A")[1];
+
+    if (profilePicture) {
+      return (
+        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+          <Image
+            src={profilePicture}
+            alt={displayName}
+            width={40}
+            height={40}
+            className="object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.querySelector('.fallback-avatar').style.display = 'block';
+            }}
+          />
+          <div className="fallback-avatar" style={{ display: 'none' }}>
+            <Avatar
+              size={40}
+              name={displayName}
+              variant="marble"
+              colors={["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"]}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Avatar
+        size={40}
+        name={displayName}
+        variant="marble"
+        colors={["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"]}
+      />
+    );
+  };
+
   return (
     <div className="w-[1024px] h-screen flex flex-col items-center">
       <Navbar />
@@ -103,15 +185,12 @@ export default function Chat({ params }) {
             <ArrowLeftIcon className="h-4 w-4 -mt-0.5" />
             Back
           </Button>
-          <Avatar
-            size={40}
-            name={params.id.split("%3A")[1]}
-            variant="marble"
-            colors={["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"]}
-          />
+          {renderAvatar()}
           <div className="flex flex-col">
-            <h2 className="text-lg text-white">{params.id.split("%3A")[1]}</h2>
-            <h3 className="text-sm text-white/40">Chats</h3>
+            <h2 className="text-lg text-white">
+              {partnerProfile?.name || params.id.split("%3A")[1]}
+            </h2>
+            
           </div>
         </div>
         <div className="flex gap-4 items-center">
@@ -160,13 +239,25 @@ export default function Chat({ params }) {
         <div className="w-full flex-grow flex relative">
           <div className="w-full h-full flex flex-col-reverse gap-2 overflow-auto absolute">
             {history.map((message, index) => (
-              console.log(message),
               <ChatBubble
                 key={index}
                 message={message}
                 isMe={message.fromDID.split(":")[1] === user.account}
-                senderName={(message.fromDID.split(":")[1] === user.account) ? "You" : message.fromDID.split(":")[1]}
+                senderName={
+                  message.fromDID.split(":")[1] === user.account
+                    ? "You"
+                    : partnerProfile?.isGroup
+                    ? message.fromCAIP10?.split(":")[1] // Use CAIP10 for group messages
+                    : (partnerProfile?.name || message.fromDID.split(":")[1])
+                }
                 timestamp={message.timestamp}
+                profilePicture={
+                  message.fromDID.split(":")[1] === user.account
+                    ? myProfile?.picture
+                    : partnerProfile?.isGroup
+                    ? null // Let ChatBubble handle group member avatars
+                    : partnerProfile?.picture
+                }
               />
             ))}
           </div>
