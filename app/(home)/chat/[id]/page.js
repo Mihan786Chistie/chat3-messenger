@@ -6,6 +6,7 @@ import {
   ArrowLeftIcon,
   PaperAirplaneIcon,
   PaperClipIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/solid";
 import Avatar from "boring-avatars";
 import { useRouter } from "next/navigation";
@@ -17,8 +18,9 @@ import ChatBubble from "@/components/layout/chat/ChatBubble";
 import usePush from "@/hooks/usePush";
 import Image from "next/image";
 
-export default function Chat({ params }) {
+export default function Chat({ params, searchParams }) {
   const router = useRouter();
+  const [chatData, setChatData] = useState(null);
   const user = useSelector((state) => state.push.user);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
@@ -41,6 +43,19 @@ export default function Chat({ params }) {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (searchParams?.isGroup) {
+      try {
+        const parsedData = searchParams.isGroup
+        setChatData(parsedData);
+      } catch (error) {
+        console.error("Error parsing chat data:", error);
+      }
+    }
+  }, [searchParams]);
+
+  console.log("chat data: ", chatData);
+
   const fetchHistory = async () => {
     const history = await user.chat.history(params.id.replace("%3A", ":"));
     setHistory(history);
@@ -53,14 +68,14 @@ export default function Chat({ params }) {
         const reader = new FileReader();
         reader.onload = async (event) => {
           const base64String = event.target?.result;
-          if (typeof base64String === 'string') {
+          if (typeof base64String === "string") {
             await sendMessage(base64String, file.type);
           }
         };
         reader.readAsDataURL(file);
       } catch (error) {
-        console.error('Error processing image:', error);
-        alert('Failed to process image. Please try again.');
+        console.error("Error processing image:", error);
+        alert("Failed to process image. Please try again.");
       }
     }
   };
@@ -70,77 +85,66 @@ export default function Chat({ params }) {
       if (!content && message.trim()) {
         // Handle text message
         await user.chat.send(params.id.replace("%3A", ":"), {
-          type: 'Text',
+          type: "Text",
           content: message,
         });
         setMessage("");
       } else if (content) {
         console.log(content);
 
-        if(content.startsWith('data:image')) {
+        if (content.startsWith("data:image")) {
           // Handle image message - ensure content is base64
-          if (!content.startsWith('data:image')) {
-            throw new Error('Invalid image format');
+          if (!content.startsWith("data:image")) {
+            throw new Error("Invalid image format");
           }
 
           await user.chat.send(params.id.replace("%3A", ":"), {
-            type: 'Image',
+            type: "Image",
             content: content, // Send the base64 string directly
           });
 
           return;
-          
         }
         // Handle file message - removed image format check
         await user.chat.send(params.id.replace("%3A", ":"), {
-          type: 'File',
+          type: "File",
           content: JSON.stringify({
             content: content,
-            type: fileType
+            type: fileType,
           }),
         });
       }
       fetchHistory();
     } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
     }
   };
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!user || !isConnected) return;
       try {
-        const partnerId = params.id.replace("%3A", ":");
-        
-        // Check if this is a group chat
-        if (partnerId.includes('group')) {
-          const groupData = await user.chat.group.info(partnerId);
-          setPartnerProfile({
-            name: groupData.groupName,
-            picture: groupData.groupImage,
-            isGroup: true
-          });
-          return;
-        }
+        if (chatData?.groupInformation) return;
 
-        // Regular user chat
+        const partnerId = params.id.replace("%3A", ":");
         const partnerAddress = partnerId.split(":")[1];
         if (!partnerAddress) return;
 
         const profile = await fetchUserProfile(partnerAddress);
         setPartnerProfile({
           ...profile,
-          isGroup: false
+          isGroup: false,
         });
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
       }
     };
 
-    if (user && isConnected) {
-      fetchProfile();
-    }
-  }, [params.id, user, isConnected]);
+    fetchProfile();
+  }, [params.id, user, isConnected, chatData]);
+
+  console.log("chat data: ", chatData);
 
   const renderAvatar = () => {
     if (!partnerProfile) return null;
@@ -158,11 +162,12 @@ export default function Chat({ params }) {
             height={40}
             className="object-cover"
             onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.parentElement.querySelector('.fallback-avatar').style.display = 'block';
+              e.target.style.display = "none";
+              e.target.parentElement.querySelector(".fallback-avatar").style.display =
+                "block";
             }}
           />
-          <div className="fallback-avatar" style={{ display: 'none' }}>
+          <div className="fallback-avatar" style={{ display: "none" }}>
             <Avatar
               size={40}
               name={displayName}
@@ -190,7 +195,7 @@ export default function Chat({ params }) {
 
       <div className="w-full flex items-center justify-between gap-4 rounded-2xl bg-gray-900 p-3 px-5 mt-5">
         <div className="flex gap-4 items-center">
-        <Button
+          <Button
             size="lg"
             className="rounded-2xl flex items-center justify-center gap-2 bg-gray-800"
             onClick={() => {
@@ -205,16 +210,23 @@ export default function Chat({ params }) {
             <h2 className="text-lg text-white">
               {partnerProfile?.name || params.id.split("%3A")[1]}
             </h2>
-            
           </div>
         </div>
         <div className="flex gap-4 items-center">
+          {chatData == "true" ? (
+            <Button
+              size="lg"
+              className="rounded-2xl flex items-center justify-center gap-2 bg-gray-800"
+            >
+              <Cog6ToothIcon className="h-5 w-5" />
+            </Button>
+          ): null}
         </div>
       </div>
 
       <div className="w-full h-full flex flex-col-reverse items-center gap-3 mt-5">
         <div className="w-full flex items-center justify-between gap-4 rounded-2xl bg-gray-900 p-3 px-5 mb-5">
-        <input
+          <input
             type="file"
             accept="image/*"
             className="hidden"
@@ -263,7 +275,7 @@ export default function Chat({ params }) {
                     ? "You"
                     : partnerProfile?.isGroup
                     ? message.fromCAIP10?.split(":")[1] // Use CAIP10 for group messages
-                    : (partnerProfile?.name || message.fromDID.split(":")[1])
+                    : partnerProfile?.name || message.fromDID.split(":")[1]
                 }
                 timestamp={message.timestamp}
                 profilePicture={

@@ -86,6 +86,16 @@ export default function usePush() {
     }
   };
 
+  const fetchGroup = async (groupId) => {
+    try {
+      const groupData = await user.chat.group.info(groupId);
+      return groupData;
+    } catch (error) {
+      console.error('Error fetching group data:', error);
+      throw error;
+    }
+  };
+  
   return {
     fetchChats,
     fetchRequests,
@@ -94,5 +104,6 @@ export default function usePush() {
     streamChat,
     fetchUserProfile,
     createGroup,
+    fetchGroup,
   };
 }
