@@ -54,7 +54,7 @@ export default function Chat({ params }) {
         reader.onload = async (event) => {
           const base64String = event.target?.result;
           if (typeof base64String === 'string') {
-            await sendMessage(base64String);
+            await sendMessage(base64String, file.type);
           }
         };
         reader.readAsDataURL(file);
@@ -65,7 +65,7 @@ export default function Chat({ params }) {
     }
   };
 
-  const sendMessage = async (content) => {
+  const sendMessage = async (content, fileType) => {
     try {
       if (!content && message.trim()) {
         // Handle text message
@@ -75,14 +75,29 @@ export default function Chat({ params }) {
         });
         setMessage("");
       } else if (content) {
-        // Handle image message - ensure content is base64
-        if (!content.startsWith('data:image')) {
-          throw new Error('Invalid image format');
+        console.log(content);
+
+        if(content.startsWith('data:image')) {
+          // Handle image message - ensure content is base64
+          if (!content.startsWith('data:image')) {
+            throw new Error('Invalid image format');
+          }
+
+          await user.chat.send(params.id.replace("%3A", ":"), {
+            type: 'Image',
+            content: content, // Send the base64 string directly
+          });
+
+          return;
+          
         }
-        
+        // Handle file message - removed image format check
         await user.chat.send(params.id.replace("%3A", ":"), {
-          type: 'Image',
-          content: content, // Send the base64 string directly
+          type: 'File',
+          content: JSON.stringify({
+            content: content,
+            type: fileType
+          }),
         });
       }
       fetchHistory();
