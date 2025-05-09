@@ -1,5 +1,6 @@
 import Avatar from "boring-avatars";
 import Image from "next/image";
+import { DocumentIcon } from "@heroicons/react/24/outline";
 
 export default function ChatBubble({ message, isMe, senderName, timestamp, profilePicture }) {
   const formatTime = (timestamp) => {
@@ -29,6 +30,35 @@ export default function ChatBubble({ message, isMe, senderName, timestamp, profi
               alt="chat image" 
               className="max-w-[300px] rounded-lg"
             />
+          </div>
+        );
+      } else if (message.messageType === 'File') {
+        // Parse the file content JSON
+        const fileData = JSON.parse(message.messageContent);
+        const fileName = fileData.content.split('/').pop().split(';')[0];
+        const fileType = fileData.type;
+        
+        return (
+          <div className="flex flex-col gap-1">
+            {!isMe && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-blue-400">{truncatedAddress}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-gray-800 p-3 rounded-lg">
+              <DocumentIcon className="h-6 w-6 text-blue-400" />
+              <div className="flex flex-col">
+                <span className="text-sm text-white">{fileData.content.slice(0, 10)}</span>
+                <span className="text-xs text-gray-400">{fileType}</span>
+              </div>
+              <a 
+                href={fileData.content} 
+                download={fileName}
+                className="ml-auto bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm"
+              >
+                Download
+              </a>
+            </div>
           </div>
         );
       } else {
