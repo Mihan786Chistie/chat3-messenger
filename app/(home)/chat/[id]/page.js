@@ -10,17 +10,20 @@ import {
 } from "@heroicons/react/24/solid";
 import Avatar from "boring-avatars";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import ChatBubble from "@/components/layout/chat/ChatBubble";
 import usePush from "@/hooks/usePush";
 import Image from "next/image";
+import GroupSettingsModal from "@/components/layout/chat/GroupSettingsModal";
 
 export default function Chat({ params, searchParams }) {
   const router = useRouter();
   const [chatData, setChatData] = useState(null);
+  const [chatId, setChatId] = useState(null);
+  const [groupInfof, setGroupInfof] = useState(null);
+  const [openSettings, setOpenSettings] = useState(false);
   const user = useSelector((state) => state.push.user);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
@@ -28,38 +31,66 @@ export default function Chat({ params, searchParams }) {
   const data = useSelector((state) => state.push.data);
   const fileInputRef = useRef(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
-  const { fetchUserProfile } = usePush();
+  const { fetchUserProfile, fetchGroup } = usePush();
   const myProfile = useSelector((state) => state.push.profile);
 
-  useEffect(() => {
-    if (user && isConnected) {
-      fetchHistory();
-    }
-  }, [user, isConnected]);
-
-  useEffect(() => {
-    if (data && user && isConnected) {
-      fetchHistory();
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (searchParams?.isGroup) {
-      try {
-        const parsedData = searchParams.isGroup
-        setChatData(parsedData);
-      } catch (error) {
-        console.error("Error parsing chat data:", error);
-      }
-    }
-  }, [searchParams]);
-
-  console.log("chat data: ", chatData);
-
-  const fetchHistory = async () => {
+  // Memoize fetchHistory
+  const fetchHistory = useCallback(async () => {
+    if (!user) return;
     const history = await user.chat.history(params.id.replace("%3A", ":"));
     setHistory(history);
-  };
+  }, [user, params.id]);
+
+  // Combine chat data and group info fetching
+  useEffect(() => {
+    const initializeChat = async () => {
+      if (!searchParams?.isGroup || !searchParams?.chatId) return;
+
+      try {
+        setChatData(searchParams.isGroup);
+        setChatId(searchParams.chatId);
+
+        if (searchParams.isGroup === "true" && searchParams.chatId) {
+          const groupData = await fetchGroup(searchParams.chatId);
+          setGroupInfof(groupData);
+        }
+      } catch (error) {
+        console.error("Error initializing chat:", error);
+      }
+    };
+
+    initializeChat();
+  }, [searchParams, fetchGroup]);
+
+  // Combine message history and profile fetching
+  useEffect(() => {
+    const initializeMessages = async () => {
+      if (!user || !isConnected) return;
+
+      await fetchHistory();
+
+      if (!chatData?.groupInformation) {
+        const partnerId = params.id.replace("%3A", ":");
+        const partnerAddress = partnerId.split(":")[1];
+        if (partnerAddress) {
+          const profile = await fetchUserProfile(partnerAddress);
+          setPartnerProfile({
+            ...profile,
+            isGroup: false,
+          });
+        }
+      }
+    };
+
+    initializeMessages();
+  }, [user, isConnected, params.id, chatData, fetchHistory]);
+
+  // Handle new messages
+  useEffect(() => {
+    if (data?.type === "message" && user && isConnected) {
+      fetchHistory();
+    }
+  }, [data?.type, user, isConnected, fetchHistory]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -121,31 +152,6 @@ export default function Chat({ params, searchParams }) {
     }
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user || !isConnected) return;
-      try {
-        if (chatData?.groupInformation) return;
-
-        const partnerId = params.id.replace("%3A", ":");
-        const partnerAddress = partnerId.split(":")[1];
-        if (!partnerAddress) return;
-
-        const profile = await fetchUserProfile(partnerAddress);
-        setPartnerProfile({
-          ...profile,
-          isGroup: false,
-        });
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      }
-    };
-
-    fetchProfile();
-  }, [params.id, user, isConnected, chatData]);
-
-  console.log("chat data: ", chatData);
-
   const renderAvatar = () => {
     if (!partnerProfile) return null;
 
@@ -191,6 +197,14 @@ export default function Chat({ params, searchParams }) {
 
   return (
     <div className="w-[1024px] h-screen flex flex-col items-center">
+      {chatData == "true" ? (
+        <GroupSettingsModal
+          open={openSettings}
+          handleOpen={() => setOpenSettings(!openSettings)}
+          chatId={chatId}
+          groupInfo={groupInfof}
+        />
+      ) : null}
       <Navbar />
 
       <div className="w-full flex items-center justify-between gap-4 rounded-2xl bg-gray-900 p-3 px-5 mt-5">
@@ -217,10 +231,11 @@ export default function Chat({ params, searchParams }) {
             <Button
               size="lg"
               className="rounded-2xl flex items-center justify-center gap-2 bg-gray-800"
+              onClick={() => setOpenSettings(true)}
             >
               <Cog6ToothIcon className="h-5 w-5" />
             </Button>
-          ): null}
+          ) : null}
         </div>
       </div>
 

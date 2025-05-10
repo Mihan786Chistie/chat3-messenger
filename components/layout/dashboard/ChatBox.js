@@ -85,7 +85,7 @@ export default function ChatBox({ chat, profilePicture }) {
     <Link
       href={{
         pathname: `/chat/${chatId}`,
-        query: { isGroup: isGroupChat} ,
+        query: { isGroup: isGroupChat, chatId: chatId } ,
       }}
       className="w-full flex items-center gap-4 rounded-2xl bg-gray-900 hover:bg-gray-800 transition-colors duration-300 hover:cursor-pointer p-3 px-5"
     >
