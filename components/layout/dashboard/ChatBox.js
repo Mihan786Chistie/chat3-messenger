@@ -1,12 +1,12 @@
 import Avatar from "boring-avatars";
-import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import usePush from "@/hooks/usePush";
+import { DocumentIcon } from "@heroicons/react/24/solid";
+import Link from 'next/link';
 
-export default function ChatBox({ chat }) {
-  const router = useRouter();
+export default function ChatBox({ chat, profilePicture }) {
   const [partnerProfile, setPartnerProfile] = useState(null);
   const { fetchUserProfile } = usePush();
   const myProfile = useSelector((state) => state.push.profile);
@@ -76,15 +76,18 @@ export default function ChatBox({ chat }) {
     return null;
   };
 
+  const isGroupChat = chat.groupInformation ? true : false;
+
   const chatId = getChatId();
   if (!chatId) return null;
 
   return (
-    <div
-      className="w-full flex items-center gap-4 rounded-2xl bg-gray-900 hover:bg-gray-800 transition-colors duration-300 hover:cursor-pointer p-3 px-5"
-      onClick={() => {
-        router.push(`/chat/${chatId}`);
+    <Link
+      href={{
+        pathname: `/chat/${chatId}`,
+        query: { isGroup: isGroupChat, chatId: chatId } ,
       }}
+      className="w-full flex items-center gap-4 rounded-2xl bg-gray-900 hover:bg-gray-800 transition-colors duration-300 hover:cursor-pointer p-3 px-5"
     >
       {chat.groupInformation?.groupImage ? (
         <img 
@@ -92,9 +95,9 @@ export default function ChatBox({ chat }) {
           alt="group" 
           className="w-10 h-10 rounded-full object-cover"
         />
-      ) : partnerProfile?.picture ? (
+      ) : profilePicture ? (
         <img 
-          src={partnerProfile.picture} 
+          src={profilePicture} 
           alt="profile" 
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -111,9 +114,11 @@ export default function ChatBox({ chat }) {
         <h3 className="text-sm text-white/40">
           {chat.msg?.messageType === 'Image' ? (
             <PhotoIcon className="h-4 w-4 inline" />
+          ) : chat.msg?.messageType === 'File' ? (
+            <DocumentIcon className="h-4 w-4 inline" />
           ) : chat.msg?.messageContent}
         </h3>
       </div>
-    </div>
+    </Link>
   );
 }

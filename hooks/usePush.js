@@ -86,6 +86,40 @@ export default function usePush() {
     }
   };
 
+  const fetchGroup = async (groupId) => {
+    try {
+      const groupData = await user?.chat?.group?.info(groupId);
+      return groupData;
+    } catch (error) {
+      console.error('Error fetching group data:', error);
+      throw error;
+    }
+  };
+
+  const addToGroup = async (groupId, address) => {
+    try {
+      await user.chat.group.add(groupId, {
+        role: 'MEMBER',
+        accounts: [address],
+      });
+    } catch (error) {
+      console.error('Error adding to group:', error);
+      throw error;
+    }
+  }
+
+  const removeFromGroup = async (groupId, address) => {
+    try {
+      await user.chat.group.remove(groupId, {
+        role: 'MEMBER',
+        accounts: [address],
+      });
+    } catch (error) {
+      console.error('Error removing from group:', error);
+      throw error;
+    }
+  }
+
   return {
     fetchChats,
     fetchRequests,
@@ -94,5 +128,8 @@ export default function usePush() {
     streamChat,
     fetchUserProfile,
     createGroup,
+    fetchGroup,
+    addToGroup,
+    removeFromGroup,
   };
 }

@@ -33,6 +33,8 @@ export default function Chats() {
     }
   }, [data]);
 
+  console.log("Chats: ", chats);
+
   return (
     chats && (
       <div className="w-full h-full flex flex-col items-center gap-3">
@@ -67,7 +69,7 @@ export default function Chats() {
         <div className="flex-1 w-full overflow-y-auto scrollbar-hide">
           <div className="space-y-3">
             {chats.map((chat) => (
-              <ChatBox key={chat.chatId} chat={chat} />
+              <ChatBox key={chat.chatId} chat={chat} profilePicture={chat.profilePicture}/>
             ))}
           </div>
         </div>
