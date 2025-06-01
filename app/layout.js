@@ -2,7 +2,7 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ReduxProvider from "@/providers/reduxProvider";
-import { WagmiProvider, createConfig, configureChains } from "wagmi";
+import { WagmiProvider, createConfig } from "wagmi";
 import { http } from 'viem';
 import { mainnet } from 'viem/chains';
 import {
@@ -25,31 +25,41 @@ const config = createConfig({
 
 const queryClient = new QueryClient();
 
-export default function RootLayout({ children }) {
+// Create a separate client component for Dynamic context
+function DynamicProviderWrapper({ children }) {
   const router = useRouter();
+  
+  return (
+    <DynamicContextProvider
+      settings={{
+        environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID,
+        walletConnectors: [EthereumWalletConnectors],
+        events: {
+          onLogout: () => {
+            router.push("/");
+          }
+        }
+      }}
+    >
+      {children}
+    </DynamicContextProvider>
+  );
+}
+
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
         <ReduxProvider>
-          <DynamicContextProvider
-                settings={{
-                  environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID,
-                  walletConnectors: [EthereumWalletConnectors],
-                  events: {
-                    onLogout: () => {
-                      router.push("/");
-                    }
-                  }
-                }}
-              >
-                <WagmiProvider config={config}>
-                  <QueryClientProvider client={queryClient}>
-                    <DynamicWagmiConnector>
-                      {children}
-                    </DynamicWagmiConnector>
-                  </QueryClientProvider>
-                </WagmiProvider>
-              </DynamicContextProvider>
+          <DynamicProviderWrapper>
+            <WagmiProvider config={config}>
+              <QueryClientProvider client={queryClient}>
+                <DynamicWagmiConnector>
+                  {children}
+                </DynamicWagmiConnector>
+              </QueryClientProvider>
+            </WagmiProvider>
+          </DynamicProviderWrapper>
         </ReduxProvider>
       </body>
     </html>

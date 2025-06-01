@@ -2,7 +2,7 @@
 import { Button } from "@material-tailwind/react";
 import Avatar from "boring-avatars";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useDispatch, useSelector } from "react-redux";
 import { handleProfileDialog } from "@/redux/slice/pushSlice";
@@ -18,7 +18,8 @@ export default function Navbar() {
   const profile = useSelector((state) => state.push.profile);
 
 
-  useState(() => {
+  // Fix: Change useState to useEffect
+  useEffect(() => {
     setClient(true);
   }, []);
 
