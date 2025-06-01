@@ -1,23 +1,55 @@
+"use client";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { WagmiProvider } from "@/providers/wagmiProvider";
 import ReduxProvider from "@/providers/reduxProvider";
+import { WagmiProvider, createConfig, configureChains } from "wagmi";
+import { http } from 'viem';
+import { mainnet } from 'viem/chains';
+import {
+  DynamicContextProvider,
+  DynamicWidget,
+} from '@dynamic-labs/sdk-react-core';
+import { EthereumWalletConnectors } from '@dynamic-labs/ethereum';
+import { DynamicWagmiConnector } from '@dynamic-labs/wagmi-connector';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useRouter } from "next/navigation";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+
+const config = createConfig({
+  chains: [mainnet],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [mainnet.id]: http(),
+  },
 });
 
-export const metadata = {
-  title: "3Chat",
-};
+const queryClient = new QueryClient();
 
 export default function RootLayout({ children }) {
+  const router = useRouter();
   return (
     <html lang="en">
-      <body className={poppins.className}>
+      <body>
         <ReduxProvider>
-          <WagmiProvider>{children}</WagmiProvider>
+          <DynamicContextProvider
+                settings={{
+                  environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID,
+                  walletConnectors: [EthereumWalletConnectors],
+                  events: {
+                    onLogout: () => {
+                      router.push("/");
+                    }
+                  }
+                }}
+              >
+                <WagmiProvider config={config}>
+                  <QueryClientProvider client={queryClient}>
+                    <DynamicWagmiConnector>
+                      {children}
+                    </DynamicWagmiConnector>
+                  </QueryClientProvider>
+                </WagmiProvider>
+              </DynamicContextProvider>
         </ReduxProvider>
       </body>
     </html>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useDispatch, useSelector } from "react-redux";
 import { handleProfileDialog } from "@/redux/slice/pushSlice";
+import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
 
 export default function Navbar() {
   const { disconnect } = useDisconnect();
@@ -47,11 +48,6 @@ export default function Navbar() {
               ? address.slice(0, 4) + "..." + address.slice(-4)
               : "0x00...0000")}
           </h2>
-          <h3 className="text-sm text-white/40">
-            {connector && connector.name === "MetaMask"
-              ? "Metamask"
-              : "Coinbase"}
-          </h3>
         </div>
         <Button
           variant="text"
@@ -67,7 +63,7 @@ export default function Navbar() {
           <h1 className="font-bold text-5xl">3Chat</h1>
         </div>
 
-        <Button
+        {/* <Button
           className="h-full rounded-2xl normal-case"
           size="lg"
           onClick={() => {
@@ -79,7 +75,8 @@ export default function Navbar() {
           }}
         >
           Disconnect
-        </Button>
+        </Button> */}
+        <DynamicWidget />
       </div>
     )
   );
