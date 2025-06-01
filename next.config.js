@@ -1,4 +1,3 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   webpack: (config, { isServer }) => {
@@ -14,8 +13,9 @@ const nextConfig = {
   },
   experimental: {
     forceSwcTransforms: true,
-    esmExternals: 'loose'
+    esmExternals: 'loose',
+    outputFileTracing: false, // ⛔ disable tracing
   }
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
