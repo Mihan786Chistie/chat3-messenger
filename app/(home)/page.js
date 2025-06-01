@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { setUser, setProfile } from "@/redux/slice/pushSlice"
 import { useRouter } from "next/navigation"
 import usePush from "@/hooks/usePush"
+import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
 
 export default function Home() {
   const [isClient, setIsClient] = useState(false)
@@ -60,15 +61,9 @@ export default function Home() {
       <div className="w-[400px] border-[1px] border-white/30 rounded-3xl flex flex-col items-center p-5 pb-7">
         <h1 className="font-bold text-5xl">3Chat</h1>
         <h3>Messenger</h3>
-
+        <br />
         {!isConnected && (
-          <Button
-            className="w-full mt-10 rounded-2xl"
-            size="lg"
-            onClick={handleConnect}
-          >
-            {isClient ? "Metamask" : "Connect"}
-          </Button>
+          <DynamicWidget />
         )}
 
         {isConnected && (
